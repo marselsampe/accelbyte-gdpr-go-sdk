@@ -5,9 +5,12 @@
 
 package object
 
+import pb "github.com/AccelByte/accelbyte-gdpr-go-sdk/pkg/pb"
+
 type DataGenerationHandler func(namespace, userID string, isPublisherNamespace bool) (*DataGenerationResult, error)
 type DataDeletionHandler func(namespace, userID string, isPublisherNamespace bool) error
 type DataRestrictionHandler func(namespace, userID string, restrict, isPublisherNamespace bool) error
+type PlatformAccountClosureHandler func(platform, platformUserID string, accounts []*pb.AccountInfo) error
 
 // DataGenerationResult contains result from DataGenerationHandler implementation
 type DataGenerationResult struct {

@@ -37,3 +37,7 @@ func (sdk GdprGrpc) SetDataDeletionHandler(handler object.DataDeletionHandler) {
 func (sdk GdprGrpc) SetDataRestrictionHandler(handler object.DataRestrictionHandler) {
 	sdk.gdprServiceServer.DataRestrictionHandler = handler
 }
+
+func (sdk GdprGrpc) SetPlatformAccountClosureHandler(handler object.PlatformAccountClosureHandler) {
+	sdk.gdprServiceServer.PlatformAccountClosureHandler = handler
+}

@@ -3,10 +3,11 @@
 GDPR SDK for integrating Go services with AGS (AccelByte Gaming Services) GDPR service.
 
 This GDPR SDK could be used by participant services to integrate into AGS GDPR workflow.
-There are 3 GDPR workflow that this GDPR SDK supported:
+There are 4 GDPR workflow that this GDPR SDK supported:
 1. Right to data portability
 2. Right to erasure (right to be forgotten)
 3. Right to restrict processing
+4. Right to erase 3rd party account information
 
 The participant services will hook their _**concrete go function**_ of 3 functionalities above into this GDPR SDK.
 
@@ -85,5 +86,13 @@ gdprSDK.SetDataRestrictionHandler(func(namespace, userID string, restrict, isPub
     // your implementation here...
 
     return nil
+})
+
+// register platform account closure handler (workflow: Right to erase 3rd party account information) 
+gdprSDK.SetPlatformAccountClosureHandler(func(platform, platformUserID string, accounts []*registered_v1.AccountInfo) error {
+logrus.Info("deleting platform account info...")
+// your implementation here...
+
+return nil
 })
 ```

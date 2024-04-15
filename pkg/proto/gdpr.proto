@@ -30,6 +30,12 @@ service GDPR {
    */
   rpc DataRestriction(DataRestrictionRequest) returns (DataRestrictionResponse) {};
 
+  /**
+  Platform Account Closure.
+  Used to inform the registered services to handle the 3rd party account closure.
+   */
+  rpc PlatformAccountClosure(PlatformAccountClosureRequest) returns (PlatformAccountClosureResponse) {};
+
 }
 
 message DataGenerationRequest {
@@ -65,4 +71,20 @@ message DataRestrictionRequest {
 message DataRestrictionResponse {
   bool success = 1; // indicate restrict processing was success
   string message = 2; // message from restrict processing
+}
+
+message AccountInfo {
+  string namespace = 1; // namespace
+  string userId = 2;    // user id in the namespace
+}
+
+message PlatformAccountClosureRequest {
+  string platform = 1; // platform: psn, xbox, epicgames, etc
+  string platformUserId = 2; // third party account id
+  repeated AccountInfo accounts = 3; // account info in each namespace
+}
+
+message PlatformAccountClosureResponse {
+  bool success = 1; // indicates platform account closure was success
+  string message = 2; // message from platform account closure process
 }
