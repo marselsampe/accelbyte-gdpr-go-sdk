@@ -35,6 +35,10 @@ type GDPRClient interface {
 	// Used to inform registered service when specific IAM account was disabled,
 	// So that the service could ensure the personal data associated with disabled account ceased to be available to other users.
 	DataRestriction(ctx context.Context, in *DataRestrictionRequest, opts ...grpc.CallOption) (*DataRestrictionResponse, error)
+	// *
+	// Platform Account Closure.
+	// Used to inform the registered services to handle the 3rd party account closure.
+	PlatformAccountClosure(ctx context.Context, in *PlatformAccountClosureRequest, opts ...grpc.CallOption) (*PlatformAccountClosureResponse, error)
 }
 
 type gDPRClient struct {
@@ -72,6 +76,15 @@ func (c *gDPRClient) DataRestriction(ctx context.Context, in *DataRestrictionReq
 	return out, nil
 }
 
+func (c *gDPRClient) PlatformAccountClosure(ctx context.Context, in *PlatformAccountClosureRequest, opts ...grpc.CallOption) (*PlatformAccountClosureResponse, error) {
+	out := new(PlatformAccountClosureResponse)
+	err := c.cc.Invoke(ctx, "/accelbyte.gdpr.registered.v1.GDPR/PlatformAccountClosure", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GDPRServer is the server API for GDPR service.
 // All implementations must embed UnimplementedGDPRServer
 // for forward compatibility
@@ -89,6 +102,10 @@ type GDPRServer interface {
 	// Used to inform registered service when specific IAM account was disabled,
 	// So that the service could ensure the personal data associated with disabled account ceased to be available to other users.
 	DataRestriction(context.Context, *DataRestrictionRequest) (*DataRestrictionResponse, error)
+	// *
+	// Platform Account Closure.
+	// Used to inform the registered services to handle the 3rd party account closure.
+	PlatformAccountClosure(context.Context, *PlatformAccountClosureRequest) (*PlatformAccountClosureResponse, error)
 	mustEmbedUnimplementedGDPRServer()
 }
 
@@ -104,6 +121,9 @@ func (UnimplementedGDPRServer) DataDeletion(context.Context, *DataDeletionReques
 }
 func (UnimplementedGDPRServer) DataRestriction(context.Context, *DataRestrictionRequest) (*DataRestrictionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DataRestriction not implemented")
+}
+func (UnimplementedGDPRServer) PlatformAccountClosure(context.Context, *PlatformAccountClosureRequest) (*PlatformAccountClosureResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PlatformAccountClosure not implemented")
 }
 func (UnimplementedGDPRServer) mustEmbedUnimplementedGDPRServer() {}
 
@@ -172,6 +192,24 @@ func _GDPR_DataRestriction_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GDPR_PlatformAccountClosure_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PlatformAccountClosureRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GDPRServer).PlatformAccountClosure(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/accelbyte.gdpr.registered.v1.GDPR/PlatformAccountClosure",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GDPRServer).PlatformAccountClosure(ctx, req.(*PlatformAccountClosureRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // GDPR_ServiceDesc is the grpc.ServiceDesc for GDPR service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -190,6 +228,10 @@ var GDPR_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DataRestriction",
 			Handler:    _GDPR_DataRestriction_Handler,
+		},
+		{
+			MethodName: "PlatformAccountClosure",
+			Handler:    _GDPR_PlatformAccountClosure_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

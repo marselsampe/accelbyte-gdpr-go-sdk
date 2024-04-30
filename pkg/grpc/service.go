@@ -18,9 +18,10 @@ import (
 
 type GDPRServiceServer struct {
 	pb.UnimplementedGDPRServer
-	DataGenerationHandler  object.DataGenerationHandler
-	DataDeletionHandler    object.DataDeletionHandler
-	DataRestrictionHandler object.DataRestrictionHandler
+	DataGenerationHandler         object.DataGenerationHandler
+	DataDeletionHandler           object.DataDeletionHandler
+	DataRestrictionHandler        object.DataRestrictionHandler
+	PlatformAccountClosureHandler object.PlatformAccountClosureHandler
 }
 
 func NewGDPRServiceServer() *GDPRServiceServer {
@@ -130,4 +131,27 @@ func (s *GDPRServiceServer) DataRestriction(_ context.Context, req *pb.DataRestr
 	}
 
 	return &pb.DataRestrictionResponse{Success: true}, nil
+}
+
+func (s *GDPRServiceServer) PlatformAccountClosure(_ context.Context, req *pb.PlatformAccountClosureRequest) (*pb.PlatformAccountClosureResponse, error) {
+	if req.Platform == "" || req.PlatformUserId == "" || len(req.Accounts) == 0 {
+		return &pb.PlatformAccountClosureResponse{
+			Success: false,
+			Message: "required payload is empty",
+		}, nil
+	}
+
+	if s.PlatformAccountClosureHandler != nil {
+		logrus.Debugf("[PlatformAccountClosure gRPC] Start execute for platform [%s]", req.Platform)
+		if err := s.PlatformAccountClosureHandler(req.Platform, req.PlatformUserId, req.Accounts); err != nil {
+			logrus.Errorf("[PlatformAccountClosure gRPC] Failed to handle platform account closure: %v", err)
+			return &pb.PlatformAccountClosureResponse{
+				Success: false,
+				Message: err.Error(),
+			}, nil
+		}
+	}
+	return &pb.PlatformAccountClosureResponse{
+		Success: true,
+	}, nil
 }
